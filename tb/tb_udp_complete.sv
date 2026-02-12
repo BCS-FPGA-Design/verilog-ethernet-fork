@@ -204,6 +204,7 @@ typedef enum {
 
 udp_state_t udp_state;
 
+
 always_ff @(posedge clk_125) begin
     if (reset) begin
         s_axis_udp_payload.tvalid               <= 1'b0;
@@ -272,27 +273,40 @@ end
   udp_complete udp_complete_inst (
     .clk(clk_125),
     .rst(reset),
-    // --- Ethernet loopback: m_eth_* output wired back to s_eth_* input ---
+
+    // UDP RX ETHERNET HEADER
     .s_eth_hdr_valid(m_eth_hdr_valid),
     .s_eth_hdr_ready(s_eth_hdr_ready),
-    .s_eth_dest_mac(m_eth_dest_mac),
-    .s_eth_src_mac(m_eth_src_mac),
+    .s_eth_dest_mac(m_eth_src_mac),
+    .s_eth_src_mac(m_eth_dest_mac),
     .s_eth_type(m_eth_type),
+
+
+    // UDP RX FULL ETHERNET FRAME
     .s_eth_payload_axis_tdata(m_eth_payload_axis_tdata),
     .s_eth_payload_axis_tvalid(m_eth_payload_axis_tvalid),
     .s_eth_payload_axis_tready(s_eth_payload_axis_tready),
     .s_eth_payload_axis_tlast(m_eth_payload_axis_tlast),
     .s_eth_payload_axis_tuser(m_eth_payload_axis_tuser),
+
+
+    // UDP TX ETHERNET HEADER
     .m_eth_hdr_valid(m_eth_hdr_valid),
     .m_eth_hdr_ready(s_eth_hdr_ready),
     .m_eth_dest_mac(m_eth_dest_mac),
     .m_eth_src_mac(m_eth_src_mac),
     .m_eth_type(m_eth_type),
+
+
+    // UDP TX FULL ETHERNET FRAME
     .m_eth_payload_axis_tdata(m_eth_payload_axis_tdata),
     .m_eth_payload_axis_tvalid(m_eth_payload_axis_tvalid),
     .m_eth_payload_axis_tready(s_eth_payload_axis_tready),
     .m_eth_payload_axis_tlast(m_eth_payload_axis_tlast),
     .m_eth_payload_axis_tuser(m_eth_payload_axis_tuser),
+
+
+    // IP HEADER TX
     .s_ip_hdr_valid(1'b0),
     .s_ip_hdr_ready(s_ip_hdr_ready),
     .s_ip_dscp(s_ip_dscp),
@@ -302,11 +316,15 @@ end
     .s_ip_protocol(s_ip_protocol),
     .s_ip_source_ip(s_ip_source_ip),
     .s_ip_dest_ip(s_ip_dest_ip),
+
+    // IP PAYLOAD TX
     .s_ip_payload_axis_tdata(s_ip_payload_axis_tdata),
     .s_ip_payload_axis_tvalid(1'b0),
     .s_ip_payload_axis_tready(s_ip_payload_axis_tready),
     .s_ip_payload_axis_tlast(s_ip_payload_axis_tlast),
     .s_ip_payload_axis_tuser(s_ip_payload_axis_tuser),
+
+    // IP HEADER RX
     .m_ip_hdr_valid(m_ip_hdr_valid),
     .m_ip_hdr_ready(m_ip_hdr_ready),
     .m_ip_eth_dest_mac(m_ip_eth_dest_mac),
@@ -325,11 +343,15 @@ end
     .m_ip_header_checksum(m_ip_header_checksum),
     .m_ip_source_ip(m_ip_source_ip),
     .m_ip_dest_ip(m_ip_dest_ip),
+
+    // IP PAYLOAD RX
     .m_ip_payload_axis_tdata(m_ip_payload_axis_tdata),
     .m_ip_payload_axis_tvalid(m_ip_payload_axis_tvalid),
     .m_ip_payload_axis_tready(1'b1),
     .m_ip_payload_axis_tlast(m_ip_payload_axis_tlast),
     .m_ip_payload_axis_tuser(m_ip_payload_axis_tuser),
+
+    // UDP HEADER TX
     .s_udp_hdr_valid(s_udp_hdr_valid),
     .s_udp_hdr_ready(s_udp_hdr_ready),
     .s_udp_ip_dscp(s_udp_ip_dscp),
@@ -341,11 +363,17 @@ end
     .s_udp_dest_port(s_udp_dest_port),
     .s_udp_length(s_udp_length),
     .s_udp_checksum(s_udp_checksum),
+
+
+    // UDP PAYLOAD TX
     .s_udp_payload_axis_tdata(s_axis_udp_payload.tdata),
     .s_udp_payload_axis_tvalid(s_axis_udp_payload.tvalid),
     .s_udp_payload_axis_tready(s_axis_udp_payload.tready),
     .s_udp_payload_axis_tlast(s_axis_udp_payload.tlast),
     .s_udp_payload_axis_tuser(s_axis_udp_payload.tuser),
+
+
+    // UDP HEADER RX
     .m_udp_hdr_valid(m_udp_hdr_valid),
     .m_udp_hdr_ready(m_udp_hdr_ready),
     .m_udp_eth_dest_mac(m_udp_eth_dest_mac),
@@ -368,11 +396,16 @@ end
     .m_udp_dest_port(m_udp_dest_port),
     .m_udp_length(m_udp_length),
     .m_udp_checksum(m_udp_checksum),
+ 
+    // UDP PAYLOAD RX
     .m_udp_payload_axis_tdata(m_axis_udp_payload.tdata),
     .m_udp_payload_axis_tvalid(m_axis_udp_payload.tvalid),
     .m_udp_payload_axis_tready(m_axis_udp_payload.tready),
     .m_udp_payload_axis_tlast(m_axis_udp_payload.tlast),
     .m_udp_payload_axis_tuser(m_axis_udp_payload.tuser),
+
+
+    // STATUS SIGNALS
     .ip_rx_busy(ip_rx_busy),
     .ip_tx_busy(ip_tx_busy),
     .udp_rx_busy(udp_rx_busy),
@@ -386,6 +419,8 @@ end
     .udp_rx_error_header_early_termination(udp_rx_error_header_early_termination),
     .udp_rx_error_payload_early_termination(udp_rx_error_payload_early_termination),
     .udp_tx_error_payload_early_termination(udp_tx_error_payload_early_termination),
+
+    // CONFIGURATION
     .local_mac(local_mac),
     .local_ip(local_ip),
     .gateway_ip(gateway_ip),
@@ -393,12 +428,10 @@ end
     .clear_arp_cache(clear_arp_cache)
 );
 
-
+assign m_axis_udp_payload.tready = 1'b1;
 
 initial begin
-    m_axis_udp_payload.tready = 1'b1;
     stimulus_enable = 1'b1;
-
 end
 
 
